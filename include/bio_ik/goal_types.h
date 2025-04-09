@@ -50,6 +50,12 @@
 #include <geometric_shapes/bodies.h>
 #include <geometric_shapes/shapes.h>
 
+
+// ... (includes like bio_ik/goal_types.h) ...
+#include <bio_ik/manipulability_goal.h> // <--- ADD THIS LINE
+#include <moveit/robot_state/robot_state.h> // May need this if not already included
+// ...
+
 namespace bio_ik
 {
 

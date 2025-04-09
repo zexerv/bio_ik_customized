@@ -98,6 +98,7 @@ set(SOURCES
     src/goal_types.cpp
     src/kinematics_plugin.cpp
     src/problem.cpp
+    src/manipulability_goal.cpp   # <--- ADD THIS LINE
 
     src/ik_test.cpp
     src/ik_gradient.cpp

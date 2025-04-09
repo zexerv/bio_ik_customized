@@ -66,6 +66,12 @@
 
 #include <bio_ik/goal_types.h>
 
+// ... (includes like bio_ik/goal_types.h) ...
+#include <bio_ik/manipulability_goal.h> // <--- ADD THIS LINE
+#include <moveit/robot_state/robot_state.h> // May need this if not already included
+// ...
+#include <ros/console.h> // For ROS_DEBUG_NAMED etc.
+
 using namespace bio_ik;
 
 // implement BioIKKinematicsQueryOptions
@@ -194,6 +200,7 @@ struct BioIKKinematicsPlugin : kinematics::KinematicsBase {
 
     // LOG_VAR(robot_description);
     // LOG_VAR(group_name);
+    // ROS_ERROR("!!!! BioIKKinematicsPlugin::load function entered !!!!");
 
     LOG("bio ik init", ros::this_node::getName());
 
@@ -327,6 +334,33 @@ struct BioIKKinematicsPlugin : kinematics::KinematicsBase {
           default_goals.emplace_back(minimal_displacement_goal);
         }
       }
+
+
+      // +++ START ADDED MANIPULABILITY GOAL +++
+      {
+        double weight = 0.0; // Default off
+        double epsilon = 1e-6; // Default epsilon
+        // Add ROS parameters to control this goal
+        lookupParam("manipulability_weight", weight, weight);
+        lookupParam("manipulability_epsilon", epsilon, epsilon);
+
+        if (weight > 0.0) {
+              // Create and add the goal (defaulting to secondary=true)
+              auto* manip_goal = new bio_ik::ManipulabilityGoal(weight, epsilon, true);
+              // Optional: If you need to specify the Jacobian link explicitly later:
+              // std::string jacobian_link;
+              // lookupParam("manipulability_jacobian_link", jacobian_link, std::string("")); // Default to empty string
+              // if (!jacobian_link.empty()) {
+              //    manip_goal->setJacobianLinkName(jacobian_link);
+              // }
+              ROS_INFO_NAMED("bio_ik", "Default ManipulabilityGoal added (Weight=%.3f, Epsilon=%.3e)", weight, epsilon);
+
+              default_goals.emplace_back(manip_goal);
+              LOG("BioIK: Added ManipulabilityGoal with weight %f, epsilon %f", weight, epsilon);
+        }
+      }
+    // +++ END ADDED MANIPULABILITY GOAL +++
+    
     }
 
     // LOG("init ready");

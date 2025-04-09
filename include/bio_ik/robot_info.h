@@ -117,10 +117,11 @@ public:
     inline double getClipMax(size_t i) const { return variables[i].clip_max; }
     inline double getMin(size_t i) const { return variables[i].min; }
     inline double getMax(size_t i) const { return variables[i].max; }
-
+    
     inline bool isRevolute(size_t variable_index) const { return variable_joint_types[variable_index] == moveit::core::JointModel::REVOLUTE; }
     inline bool isPrismatic(size_t variable_index) const { return variable_joint_types[variable_index] == moveit::core::JointModel::PRISMATIC; }
     inline double getMaxVelocity(size_t i) const { return variables[i].max_velocity; }
     inline double getMaxVelocityRcp(size_t i) const { return variables[i].max_velocity_rcp; }
+    inline const moveit::core::RobotModelConstPtr& getRobotModelPtr() const { return robot_model; }
 };
 }
