@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   eigen_conversions
   moveit_core
   moveit_ros_planning
+  moveit_ros_planning_interface
   pluginlib
   roscpp
   tf2
@@ -99,6 +100,7 @@ set(SOURCES
     src/kinematics_plugin.cpp
     src/problem.cpp
     src/manipulability_goal.cpp   # <--- ADD THIS LINE
+    src/collision_avoidance_goal.cpp   # <--- ADD THIS LINE
 
     src/ik_test.cpp
     src/ik_gradient.cpp

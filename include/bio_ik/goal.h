@@ -1,36 +1,3 @@
-/*********************************************************************
- * Software License Agreement (BSD License)
- *
- *  Copyright (c) 2016-2017, Philipp Sebastian Ruppel
- *  All rights reserved.
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
- *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
- *   * Neither the name of the copyright holder nor the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
- *********************************************************************/
 
 #pragma once
 
@@ -40,7 +7,8 @@
 
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_model/robot_model.h>
-
+#include <moveit/planning_scene/planning_scene.h>
+namespace planning_scene { class PlanningScene; } 
 namespace bio_ik
 {
 
@@ -63,9 +31,21 @@ protected:
     std::vector<double> velocity_weights_;
     const RobotInfo* robot_info_;
     mutable std::vector<double> temp_vector_;
+    const planning_scene::PlanningScene* planning_scene_ptr_; // Added pointer
 
 public:
-    GoalContext() {}
+    // Constructor initializing members (including the new pointer)
+    GoalContext()
+      : active_variable_positions_(nullptr)
+      , tip_link_frames_(nullptr)
+      , goal_secondary_(false)
+      , goal_weight_(1.0) // Assuming 1.0 is a sensible default
+      , joint_model_group_(nullptr)
+      , robot_info_(nullptr)
+      , planning_scene_ptr_(nullptr) // Initialize added pointer
+    {}
+
+    // Getters
     inline const Frame& getLinkFrame(size_t i = 0) const { return tip_link_frames_[goal_link_indices_[i]]; }
     inline const double getVariablePosition(size_t i = 0) const
     {
@@ -84,6 +64,9 @@ public:
     inline double getProblemVariableInitialGuess(size_t i) const { return initial_guess_[problem_active_variables_[i]]; }
     inline double getProblemVariableWeight(size_t i) const { return velocity_weights_[i]; }
     inline const RobotInfo& getRobotInfo() const { return *robot_info_; }
+    inline const planning_scene::PlanningScene* getPlanningScene() const { return planning_scene_ptr_; } // Added getter
+
+    // Modifiers/Adders used during setup
     void addLink(const std::string& name) { goal_link_names_.push_back(name); }
     void addVariable(const std::string& name) { goal_variable_names_.push_back(name); }
     void setSecondary(bool secondary) { goal_secondary_ = secondary; }
@@ -91,7 +74,13 @@ public:
     const moveit::core::JointModelGroup& getJointModelGroup() const { return *joint_model_group_; }
     const moveit::core::RobotModel& getRobotModel() const { return joint_model_group_->getParentModel(); }
     std::vector<double>& getTempVector() const { return temp_vector_; }
-    friend class Problem;
+
+    friend class Problem; // Allows Problem to set protected members
+
+// Setter for PlanningScene pointer - public or protected
+public:
+// protected:
+    inline void setPlanningScenePtr(const planning_scene::PlanningScene* ps) { planning_scene_ptr_ = ps; } // Added setter
 };
 
 class Goal

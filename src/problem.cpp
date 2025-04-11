@@ -1,36 +1,3 @@
-/*********************************************************************
- * Software License Agreement (BSD License)
- *
- *  Copyright (c) 2016-2017, Philipp Sebastian Ruppel
- *  All rights reserved.
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
- *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
- *   * Neither the name of the copyright holder nor the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
- *********************************************************************/
 
 #include "ik_base.h"
 
@@ -42,7 +9,7 @@
 #include <mutex>
 
 #include <bio_ik/goal_types.h>
-
+#include <moveit/planning_scene/planning_scene.h> 
 namespace bio_ik
 {
 
@@ -69,7 +36,7 @@ Problem::Problem()
 {
 }
 
-void Problem::initialize(moveit::core::RobotModelConstPtr robot_model, const moveit::core::JointModelGroup* joint_model_group, const IKParams& params, const std::vector<const Goal*>& goals2, const BioIKKinematicsQueryOptions* options)
+void Problem::initialize(moveit::core::RobotModelConstPtr robot_model, const moveit::core::JointModelGroup* joint_model_group, const IKParams& params, const std::vector<const Goal*>& goals2, const BioIKKinematicsQueryOptions* options, const planning_scene::PlanningScene* planning_scene_ptr)
 {
     if(robot_model != this->robot_model)
     {
@@ -134,6 +101,7 @@ void Problem::initialize(moveit::core::RobotModelConstPtr robot_model, const mov
         goal_info.goal = goal;
 
         goal->describe(goal_info.goal_context);
+        goal_info.goal_context.setPlanningScenePtr(planning_scene_ptr);
 
         for(auto& link_name : goal_info.goal_context.goal_link_names_)
         {
@@ -237,6 +205,7 @@ void Problem::initialize2()
             g.goal_context.problem_tip_link_indices_ = tip_link_indices;
             g.goal_context.velocity_weights_ = minimal_displacement_factors;
             g.goal_context.robot_info_ = &modelInfo;
+            // g.goal_context.setPlanningScenePtr(planning_scene_ptr);
         }
     }
 }
